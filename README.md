@@ -119,7 +119,7 @@ sudo rm -rf /usr/local/aws-cli
 $ aws configure
 AWS Access Key ID [None]: 
 AWS Secret Access Key [None]:
-Default region name [None]: us-west-2
+Default region name [None]: us-west-1
 Default output format [None]: json
 
 # Verify if we are able list S3 buckets
