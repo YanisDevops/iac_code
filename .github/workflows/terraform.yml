@@ -1,4 +1,4 @@
-name: Cloudcore IAC
+name: Cloudcore IAC Destroy
 
 on:
     push:
@@ -9,20 +9,20 @@ on:
     pull_request:
       branches: 
         - main
-
       paths: 
         - terraform/**
+
 env:
     # credentials for deployment to AWS
     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    # S3 bucket for the terraform state. 
+    # S3 bucket for the terraform state.
     BUCKET_TF_STATE: ${{ secrets.BUCKET_TF_STATE }}
     AWS_REGION: us-east-1
 
 jobs:
-    terraform:
-        name: "Apply terraform code changes"
+    terraform-destroy:
+        name: "Destroy terraform infrastructure"
         runs-on: ubuntu-latest
         defaults:
             run:
@@ -48,20 +48,16 @@ jobs:
           id: validate
           run: terraform validate
 
-        - name: Terraform Plan
+        - name: Terraform Plan Destroy
           id: plan
-          run: terraform plan -no-color -input=false -out planfile
+          run: terraform plan -destroy -no-color -input=false -out destroyplanfile
           continue-on-error: true 
 
         - name: Terraform Plan Status 
           if: steps.plan.outcome == 'failure'
           run: exit 1
 
-        - name: Terraform Apply
-          id: apply
+        - name: Terraform Destroy
+          id: destroy
           if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-          run: terraform apply -auto-approve -input=false -parallelism=1 planfile
-
-
-
-        
+          run: terraform destroy -auto-approve -input=false -parallelism=1 -plan=destroyplanfile
